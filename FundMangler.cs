@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 
-class Budgeter
+class FundMangler
 {
 	const string filePath = "budget.txt";
 	const string savePath = "persistent.sfs";
@@ -67,26 +67,29 @@ class Budgeter
 		switch(Console.ReadLine().ToLower())
 		{
 			case "s":
-				for(int i = FindBlock("CAREER"); i < save.Length; i++)
+				for(int i = FindBlockWithName("SCENARIO", "Funding"); i < save.Length; i++)
 				{
-					input = save[i].Split(' ');
-					input[0] = input[0].Trim();
-					if(input[0] == "StartingFunds")
+					if(save[i].Trim().Split(' ')[0] == "funds")
 					{
-						values[0] = int.Parse(input[2]);
-						continue;
+						values[0] = int.Parse(save[i].Trim().Split(' ')[2]);
+						break;
 					}
-					if(input[0] == "StartingScience")
+				}
+				
+				for(int i = FindBlockWithName("SCENARIO", "ResearchAndDevelopment"); i < save.Length; i++)
+				{
+					if(save[i].Trim().Split(' ')[0] == "sci")
 					{
-						values[1] = int.Parse(input[2]);
-						continue;
+						values[1] = int.Parse(save[i].Trim().Split(' ')[2]);
+						break;
 					}
-					if(input[0] == "StartingReputation")
+				}
+				
+				for(int i = FindBlockWithName("SCENARIO", "Reputation"); i < save.Length; i++)
+				{
+					if(save[i].Trim().Split(' ')[0] == "rep")
 					{
-						values[2] = int.Parse(input[2]);
-					}
-					if(input[0] == "}")
-					{
+						values[2] = int.Parse(save[i].Trim().Split(' ')[2]);
 						break;
 					}
 				}
@@ -116,26 +119,29 @@ class Budgeter
 					values[i] = int.Parse(budget[userAddress].Split(',')[i + 1]);
 				}
 				
-				for(int i = FindBlock("CAREER"); i < save.Length; i++)
+				for(int i = FindBlockWithName("SCENARIO", "Funding"); i < save.Length; i++)
 				{
-					input = save[i].Split(' ');
-					input[0] = input[0].Trim();
-					if(input[0] == "StartingFunds")
+					if(save[i].Trim().Split(' ')[0] == "funds")
 					{
-						save[i] = "\t\t\tStartingFunds = " + values[0];
-						continue;
+						save[i] = "\t\tfunds = " + values[0];
+						break;
 					}
-					if(input[0] == "StartingScience")
+				}
+				
+				for(int i = FindBlockWithName("SCENARIO", "ResearchAndDevelopment"); i < save.Length; i++)
+				{
+					if(save[i].Trim().Split(' ')[0] == "sci")
 					{
-						save[i] = "\t\t\tStartingScience = " + values[1];
-						continue;
+						save[i] = "\t\tsci = " + values[1];
+						break;
 					}
-					if(input[0] == "StartingReputation")
+				}
+				
+				for(int i = FindBlockWithName("SCENARIO", "Reputation"); i < save.Length; i++)
+				{
+					if(save[i].Trim().Split(' ')[0] == "rep")
 					{
-						save[i] = "\t\t\tStartingReputation = " + values[2];
-					}
-					if(input[0] == "}")
-					{
+						save[i] = "\t\trep = " + values[2];
 						break;
 					}
 				}
@@ -157,10 +163,15 @@ class Budgeter
 	
 	static int FindBlock(string blockName)
 	{
+		return FindBlock(blockName, 0);
+	}
+	
+	static int FindBlock(string blockName, int start)
+	{
 		string lastLine;
 		string thisLine = "";
 		
-		for(int i = 0; i < save.Length; i++)
+		for(int i = start; i < save.Length; i++)
 		{
 			lastLine = thisLine;
 			thisLine = save[i];
@@ -170,6 +181,27 @@ class Budgeter
 			}
 		}
 		return -1;
+	}
+	
+	static int FindBlockWithName(string blockName, string nameValue)
+	{
+		int index = -1;
+		for(int i = 0; i < save.Length; i++)
+		{
+			i = FindBlock(blockName, i);
+			index = i;
+			if(save[i + 1].Trim().Split(' ')[0] == "name")
+			{
+				if(save[i + 1].Trim().Split(' ')[2] == nameValue)
+				{
+					return i;
+				}else
+				{
+					continue;
+				}
+			}
+		}
+		return index;
 	}
 }
 
